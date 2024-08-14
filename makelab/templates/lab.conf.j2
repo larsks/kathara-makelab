@@ -1,10 +1,21 @@
-{% if topology.metadata -%}
+{% if topology.metadata %}
 {% set metadata = topology.metadata %}
-{% if metadata.description %}LAB_DESCRIPTION="{{ metadata.description }}"{% endif -%}
+{% if metadata.description %}
+LAB_DESCRIPTION="{{ metadata.description }}"
+{% endif %}
+{% if metadata.author %}
+LAB_AUTHOR="{{ metadata.author }}"
+{% endif %}
+{% if metadata.email %}
+LAB_EMAIL="{{ metadata.email }}"
+{% endif %}
+{% if metadata.url %}
+LAB_WEB="{{ metadata.url }}"
+{% endif %}
 
-{% endif -%}
-{% for host, conf in topology.hosts.items() -%}
-{% for net in conf.connections -%}
+{% endif %}
+{% for host, conf in topology.hosts.items() %}
+{% for net in conf.connections %}
 {{host}}[{{loop.index0}}]={{net.network}}
-{% endfor -%}
-{% endfor -%}
+{% endfor %}
+{% endfor %}

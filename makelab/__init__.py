@@ -24,7 +24,7 @@ def main():
 
     topology = models.Topology.model_validate(raw)
 
-    env = jinja2.Environment(loader=jinja2.PackageLoader(__package__))
+    env = jinja2.Environment(loader=jinja2.PackageLoader(__package__), trim_blocks=True)
     lab = env.get_template("lab.conf.j2")
     startup = env.get_template("startup.j2")
 
