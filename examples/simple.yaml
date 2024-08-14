@@ -1,0 +1,30 @@
+metadata:
+  description: This demonstrates a simple topology with one router, two networks, and three nodes.
+  author: Lars Kellogg-Stedman
+  url: https://github.com/larsks/kathara-makelab
+
+networks:
+  net0:
+    cidr: 192.168.100.0/24
+    offset: 10
+  net1:
+    cidr: 192.168.101.0/24
+    offset: 10
+
+hosts:
+  router0:
+    autogateway: false
+    connections:
+      - network: net0
+        address: 192.168.100.1
+      - network: net1
+        address: 192.168.101.1
+  node0:
+    connections:
+    - network: net0
+  node1:
+    connections:
+    - network: net0
+  node2:
+    connections:
+    - network: net1
