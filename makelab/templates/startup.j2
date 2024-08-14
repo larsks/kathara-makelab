@@ -4,8 +4,14 @@
 ip addr add {{ address }}/{{ iface.prefixlen }} dev {{ iface.device }}
 {% endfor %}
 {% endfor %}
+{% if netconf.routes %}
 
 # routes
 {% for route in netconf.routes %}
 ip route add {{ route }}
 {% endfor %}
+{% endif %}
+{% if startup %}
+
+{{ startup }}
+{% endif %}

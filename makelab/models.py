@@ -16,6 +16,7 @@ class Host(Base):
     autogateway: bool = True
     connections: list[Connection]
     routes: list[str] = pydantic.Field(default_factory=list)
+    startup: str | None = None
 
 
 class Network(Base):
