@@ -1,8 +1,8 @@
 import argparse
+import ipaddress
 import jinja2
 import os
 import pathlib
-import sys
 import tempfile
 import yaml
 
@@ -26,6 +26,8 @@ def main():
 
     env = jinja2.Environment(loader=jinja2.PackageLoader(__package__))
     lab = env.get_template("lab.conf.j2")
+    startup = env.get_template("startup.j2")
+
     with (args.output_directory / "lab.conf").open("w") as fd:
         fd.write(lab.render(topology=topology))
 
@@ -36,32 +38,40 @@ def main():
             conf.gateway = conf.cidr[1]
 
     for host, conf in topology.hosts.items():
-        with tempfile.NamedTemporaryFile(dir=args.output_directory, mode="w") as fd:
-            for n, connection in enumerate(conf.connections):
-                network = topology.networks[connection.network]
-                dev = f"eth{n}"
+        interfaces = []
+        routes = []
+        for n, connection in enumerate(conf.connections):
+            network = topology.networks[connection.network]
+            dev = f"eth{n}"
 
-                if connection.address is None:
-                    addrs = network.cidr[nextaddr[connection.network]]
-                    nextaddr[connection.network] += 1
-                else:
-                    addrs = connection.address
+            if connection.address is None:
+                addrs = network.cidr[nextaddr[connection.network]]
+                nextaddr[connection.network] += 1
+            else:
+                addrs = connection.address
 
-                if not isinstance(addrs, list):
-                    addrs = [addrs]
+            if not isinstance(addrs, list):
+                addrs = [addrs]
 
-                for addr in addrs:
-                    fd.write(f"ip addr add {addr}/{network.cidr.prefixlen} dev {dev}\n")
+            addrs = [ipaddress.IPv4Address(addr) for addr in addrs]
+            interfaces.append(
+                models.Interface(
+                    device=dev,
+                    network=connection.network,
+                    addresses=addrs,
+                    prefixlen=network.cidr.prefixlen,
+                )
+            )
 
-                if conf.autogateway:
-                    gateway = topology.networks[connection.network].gateway
-                    fd.write(f"ip route add default via {gateway}\n")
+            if conf.autogateway:
+                gateway = topology.networks[connection.network].gateway
+                routes.append(f"default via {gateway}")
 
-            for route in conf.routes:
-                fd.write(f"ip route add {route}\n")
+        routes.extend(conf.routes)
+        netconf = models.NetworkConfiguration(interfaces=interfaces, routes=routes)
 
-            if fd.tell() > 0:
-                os.rename(fd.name, args.output_directory / f"{host}.startup")
+        with (args.output_directory / f"{host}.startup").open("w") as fd:
+            fd.write(startup.render(netconf=netconf))
 
 
 if __name__ == "__main__":

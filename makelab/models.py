@@ -44,3 +44,15 @@ class Topology(Base):
                 if connection.network not in self.networks:
                     raise ValueError(f"{connection.network}: unknown network")
         return self
+
+
+class Interface(Base):
+    device: str
+    network: str
+    prefixlen: int
+    addresses: list[ipaddress.IPv4Address]
+
+
+class NetworkConfiguration(Base):
+    routes: list[str]
+    interfaces: list[Interface]

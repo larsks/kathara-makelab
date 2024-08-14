@@ -1,0 +1,11 @@
+{% for iface in netconf.interfaces -%}
+# connect device {{ iface.device }} to network "{{ iface.network }}"
+{% for address in iface.addresses -%}
+ip addr add {{ address }}/{{ iface.prefixlen }} dev {{ iface.device }}
+{% endfor -%}
+{% endfor -%}
+
+# routes
+{% for route in netconf.routes -%}
+ip route add {{ route }}
+{% endfor -%}
