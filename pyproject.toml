@@ -1,0 +1,16 @@
+[project]
+name = "kathara-makelab"
+version = "1.0.0"
+dependencies = [
+  "pydantic",
+  "pyyaml",
+  "jinja2"
+]
+
+[project.scripts]
+makelab = "makelab:main"
+
+[tool.setuptools.package-data]
+makelab = [
+  "templates/*"
+]

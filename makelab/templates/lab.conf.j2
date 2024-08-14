@@ -1,0 +1,10 @@
+{% if topology.metadata -%}
+{% set metadata = topology.metadata %}
+{% if metadata.description %}LAB_DESCRIPTION="{{ metadata.description }}"{% endif -%}
+
+{% endif -%}
+{% for host, conf in topology.hosts.items() -%}
+{% for net in conf.connections -%}
+{{host}}[{{loop.index0}}]={{net.network}}
+{% endfor -%}
+{% endfor -%}
