@@ -1,3 +1,77 @@
+# kathara-makelab
+
+Generate [Kathara] labs from YAML manifests.
+
+
+[kathara]: https://github.com/KatharaFramework/Kathara
+
+## Usage
+
+```
+usage: makelab [-h] [--output-directory OUTPUT_DIRECTORY] [topology]
+
+positional arguments:
+  topology
+
+options:
+  -h, --help            show this help message and exit
+  --output-directory OUTPUT_DIRECTORY, -o OUTPUT_DIRECTORY
+```
+
+## Installation
+
+```
+pip install git+https://github.com/larsks/kathara-makelab
+```
+
+## Description
+
+The `makelab` command reads a YAML manifest and generates a `lab.conf` and associated `*.startup` files. This allows you to encapsulate a complete lab in a single file, making it easier to share with others.
+
+## Examples
+
+## Simple
+
+The [`simple.yaml`](examples/simple.yaml) shows how to create a simple topology consisting of two hosts and a router.
+
+```yaml
+metadata:
+  description: This demonstrates a simple topology with one router, two networks, and three nodes.
+  author: Lars Kellogg-Stedman
+  url: https://github.com/larsks/kathara-makelab
+
+networks:
+  net0:
+    cidr: 192.168.100.0/24
+  net1:
+    cidr: 192.168.101.0/24
+
+common:
+  startup: |
+    cat /shared/hosts >> /etc/hosts
+
+hosts:
+  router0:
+    autogateway: false
+    interfaces:
+      - network: net0
+      - network: net1
+  node0:
+    interfaces:
+    - network: net0
+  node1:
+    interfaces:
+    - network: net0
+  node2:
+    interfaces:
+    - network: net1
+```
+
+## Featureful
+
+The [`featureful.yaml`](examples/featureful.yaml) demonstrates most of the options available in a makelab manifest.
+
+```yaml
 metadata:
   description: This demonstrates several features of makelab.
   author: Lars Kellogg-Stedman
@@ -67,3 +141,4 @@ hosts:
       address: 192.168.101.37
     options:
       env: SOMEVAR=foo
+```

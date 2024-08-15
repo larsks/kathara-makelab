@@ -1,0 +1,47 @@
+# kathara-makelab
+
+Generate [Kathara] labs from YAML manifests.
+
+
+[kathara]: https://github.com/KatharaFramework/Kathara
+
+## Usage
+
+```
+usage: makelab [-h] [--output-directory OUTPUT_DIRECTORY] [topology]
+
+positional arguments:
+  topology
+
+options:
+  -h, --help            show this help message and exit
+  --output-directory OUTPUT_DIRECTORY, -o OUTPUT_DIRECTORY
+```
+
+## Installation
+
+```
+pip install git+https://github.com/larsks/kathara-makelab
+```
+
+## Description
+
+The `makelab` command reads a YAML manifest and generates a `lab.conf` and associated `*.startup` files. This allows you to encapsulate a complete lab in a single file, making it easier to share with others.
+
+## Examples
+
+## Simple
+
+The [`simple.yaml`](examples/simple.yaml) shows how to create a simple topology consisting of two hosts and a router.
+
+```yaml
+.INCLUDE examples/simple.yaml
+```
+
+## Featureful
+
+The [`featureful.yaml`](examples/featureful.yaml) demonstrates most of the options available in a makelab manifest.
+
+```yaml
+.INCLUDE examples/featureful.yaml
+```
