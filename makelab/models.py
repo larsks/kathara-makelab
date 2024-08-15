@@ -9,7 +9,15 @@ class Base(pydantic.BaseModel):
 
 class Interface(Base):
     network: str
-    address: ipaddress.IPv4Address | list[ipaddress.IPv4Address] | None = None
+    address: list[ipaddress.IPv4Address] | None = None
+
+    @pydantic.field_validator("address", mode="before")
+    @classmethod
+    def ensure_list(cls, v: str | list[str]) -> list[str]:
+        if not isinstance(v, list):
+            v = [v]
+
+        return v
 
 
 class Options(Base):
@@ -38,11 +46,25 @@ class Host(Base):
 
 class Network(Base):
     cidr: ipaddress.IPv4Network
-    gateway: str | None = None
+    gateway: ipaddress.IPv4Address | None = None
     offset: int = 1
+    autogateway: bool = True
 
     _addrcount: int = 0
     _allocated: set[ipaddress.IPv4Address] = set()
+
+    @pydantic.model_validator(mode="after")
+    def validate_gateway(self) -> Self:
+        if self.gateway is None and self.autogateway:
+            self.gateway = self._allocate_one(self.cidr[1])
+        elif self.gateway is not None:
+            if self.gateway not in self.cidr:
+                raise ValueError(f"{self.gateway} is not contained by {self.cidr}")
+
+            if self.gateway not in self._allocated:
+                self.gateway = self._allocate_one(self.gateway)
+
+        return self
 
     def __next__(self) -> ipaddress.IPv4Address:
         while True:
@@ -55,8 +77,9 @@ class Network(Base):
 
         return addr
 
-    def allocate(self, addr: ipaddress.IPv4Address) -> ipaddress.IPv4Address:
+    def _allocate_one(self, addr: ipaddress.IPv4Address) -> ipaddress.IPv4Address:
         addr = ipaddress.IPv4Address(addr)
+
         if addr not in self.cidr:
             raise ValueError(f"{addr} is not contained by {self.cidr}")
 
@@ -66,10 +89,14 @@ class Network(Base):
         self._allocated.add(addr)
         return addr
 
-    def allocate_all(
-        self, addrs: list[ipaddress.IPv4Address]
+    def allocate(
+        self, *addrs: list[ipaddress.IPv4Address]
     ) -> list[ipaddress.IPv4Address]:
-        return [self.allocate(addr) for addr in addrs]
+        """Mark one or more addresses as in use. Once an address has been
+        allocated, a subsequent attempt to allocate it will result in a
+        ValueError."""
+
+        return [self._allocate_one(addr) for addr in addrs]
 
 
 class Metadata(Base):
@@ -88,24 +115,23 @@ class Common(Base):
 
 class Topology(Base):
     metadata: Metadata | None = None
-    networks: dict[str, Network | None]
+    networks: dict[str, Network]
     common: Common | None = None
     hosts: dict[str, Host]
 
     @pydantic.model_validator(mode="after")
-    def check_networks(self) -> Self:
+    def validate_interfaces(self) -> Self:
         for host, conf in self.hosts.items():
             for iface in conf.interfaces:
                 if iface.network not in self.networks:
                     raise ValueError(f"{iface.network}: unknown network")
 
-                if iface.address:
-                    network = self.networks[iface.network]
-                    addrs = iface.address
-                    if not isinstance(addrs, list):
-                        addrs = [addrs]
+                network = self.networks[iface.network]
 
-                    for address in addrs:
+                if iface.address is None:
+                    iface.address = [next(network)]
+                else:
+                    for address in iface.address:
                         if address not in network.cidr:
                             raise ValueError(
                                 f"{address} is not contained by {network.cidr}"
