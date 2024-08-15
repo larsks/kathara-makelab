@@ -30,18 +30,6 @@ def test_network_allocate_explicit(network):
     assert addr == ipaddress.IPv4Address("192.168.1.4")
 
 
-def test_network_allocate_conflict_explicit(network):
-    network.allocate("192.168.1.2")
-
-    with pytest.raises(ValueError):
-        network.allocate("192.168.1.2")
-
-
-def test_network_allocate_conflict_implicit(network):
-    with pytest.raises(ValueError):
-        network.allocate("192.168.1.1")
-
-
 def test_network_allocate_no_addresses_left(network):
     with pytest.raises(IndexError):
         while True:

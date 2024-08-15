@@ -61,8 +61,7 @@ class Network(Base):
             if self.gateway not in self.cidr:
                 raise ValueError(f"{self.gateway} is not contained by {self.cidr}")
 
-            if self.gateway not in self._allocated:
-                self.gateway = self._allocate_one(self.gateway)
+            self.allocate(self.gateway)
 
         return self
 
@@ -83,9 +82,6 @@ class Network(Base):
         if addr not in self.cidr:
             raise ValueError(f"{addr} is not contained by {self.cidr}")
 
-        if addr in self._allocated:
-            raise ValueError(f"{addr} has already been allocated")
-
         self._allocated.add(addr)
         return addr
 
@@ -97,6 +93,9 @@ class Network(Base):
         ValueError."""
 
         return [self._allocate_one(addr) for addr in addrs]
+
+    def seen(addr: ipaddress.IPv4Address) -> bool:
+        return addr in self._allocated
 
 
 class Metadata(Base):
