@@ -30,10 +30,8 @@ def main():
     with (args.output_directory / "lab.conf").open("w") as fd:
         fd.write(lab.render(topology=topology))
 
-    nextaddr = {}
     allconf = {}
     for network, conf in topology.networks.items():
-        nextaddr[network] = conf.offset
         if conf.gateway is None:
             conf.gateway = conf.cidr[1]
 
@@ -45,13 +43,11 @@ def main():
             dev = f"eth{n}"
 
             if iface.address is None:
-                addrs = network.cidr[nextaddr[iface.network]]
-                nextaddr[iface.network] += 1
+                addrs = [next(network)]
+            elif isinstance(iface.address, list):
+                addrs = network.allocate_all(iface.address)
             else:
-                addrs = iface.address
-
-            if not isinstance(addrs, list):
-                addrs = [addrs]
+                addrs = [network.allocate(iface.address)]
 
             addrs = [ipaddress.IPv4Address(addr) for addr in addrs]
             interfaces.append(

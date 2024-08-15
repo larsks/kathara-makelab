@@ -41,6 +41,36 @@ class Network(Base):
     gateway: str | None = None
     offset: int = 1
 
+    _addrcount: int = 0
+    _allocated: set[ipaddress.IPv4Address] = set()
+
+    def __next__(self) -> ipaddress.IPv4Address:
+        while True:
+            addr = self.cidr[self.offset + self._addrcount]
+            self._addrcount += 1
+            if addr in self._allocated:
+                continue
+            self._allocated.add(addr)
+            break
+
+        return addr
+
+    def allocate(self, addr: ipaddress.IPv4Address) -> ipaddress.IPv4Address:
+        addr = ipaddress.IPv4Address(addr)
+        if addr not in self.cidr:
+            raise ValueError(f"{addr} is not contained by {self.cidr}")
+
+        if addr in self._allocated:
+            raise ValueError(f"{addr} has already been allocated")
+
+        self._allocated.add(addr)
+        return addr
+
+    def allocate_all(
+        self, addrs: list[ipaddress.IPv4Address]
+    ) -> list[ipaddress.IPv4Address]:
+        return [self.allocate(addr) for addr in addrs]
+
 
 class Metadata(Base):
     description: str | None = None
