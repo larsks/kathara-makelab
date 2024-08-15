@@ -9,7 +9,7 @@ class Base(pydantic.BaseModel):
 
 class Interface(Base):
     network: str
-    address: str | list[str] | None = None
+    address: ipaddress.IPv4Address | list[ipaddress.IPv4Address] | None = None
 
 
 class Options(Base):
@@ -66,6 +66,18 @@ class Topology(Base):
             for iface in conf.interfaces:
                 if iface.network not in self.networks:
                     raise ValueError(f"{iface.network}: unknown network")
+
+                if iface.address:
+                    network = self.networks[iface.network]
+                    addrs = iface.address
+                    if not isinstance(addrs, list):
+                        addrs = [addrs]
+
+                    for address in addrs:
+                        if address not in network.cidr:
+                            raise ValueError(
+                                f"{address} is not contained by {network.cidr}"
+                            )
         return self
 
 
