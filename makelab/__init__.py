@@ -1,9 +1,7 @@
 import argparse
 import ipaddress
 import jinja2
-import os
 import pathlib
-import tempfile
 import yaml
 
 from makelab import models
