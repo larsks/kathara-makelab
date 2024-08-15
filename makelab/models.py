@@ -23,7 +23,7 @@ class Host(Base):
 class Network(Base):
     cidr: ipaddress.IPv4Network
     gateway: str | None = None
-    offset: int = 2
+    offset: int = 1
 
 
 class Metadata(Base):
