@@ -18,17 +18,17 @@ common:
 hosts:
   router0:
     autogateway: false
-    connections:
+    interfaces:
       - network: net0
         address: 192.168.100.1
       - network: net1
         address: 192.168.101.1
   node0:
-    connections:
+    interfaces:
     - network: net0
   node1:
-    connections:
+    interfaces:
     - network: net0
   node2:
-    connections:
+    interfaces:
     - network: net1

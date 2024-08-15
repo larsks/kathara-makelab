@@ -42,31 +42,31 @@ def main():
     for host, conf in topology.hosts.items():
         interfaces = []
         routes = []
-        for n, connection in enumerate(conf.connections):
-            network = topology.networks[connection.network]
+        for n, iface in enumerate(conf.interfaces):
+            network = topology.networks[iface.network]
             dev = f"eth{n}"
 
-            if connection.address is None:
-                addrs = network.cidr[nextaddr[connection.network]]
-                nextaddr[connection.network] += 1
+            if iface.address is None:
+                addrs = network.cidr[nextaddr[iface.network]]
+                nextaddr[iface.network] += 1
             else:
-                addrs = connection.address
+                addrs = iface.address
 
             if not isinstance(addrs, list):
                 addrs = [addrs]
 
             addrs = [ipaddress.IPv4Address(addr) for addr in addrs]
             interfaces.append(
-                models.Interface(
+                models.RealizedInterface(
                     device=dev,
-                    network=connection.network,
+                    network=iface.network,
                     addresses=addrs,
                     prefixlen=network.cidr.prefixlen,
                 )
             )
 
             if conf.autogateway:
-                gateway = topology.networks[connection.network].gateway
+                gateway = topology.networks[iface.network].gateway
                 routes.append(f"default via {gateway}")
 
         routes.extend(conf.routes)

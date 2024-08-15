@@ -7,14 +7,14 @@ class Base(pydantic.BaseModel):
     pass
 
 
-class Connection(Base):
+class Interface(Base):
     network: str
     address: str | list[str] | None = None
 
 
 class Host(Base):
     autogateway: bool = True
-    connections: list[Connection]
+    interfaces: list[Interface]
     routes: list[str] = pydantic.Field(default_factory=list)
     startup: str | None = None
     image: str | None = None
@@ -48,13 +48,13 @@ class Topology(Base):
     @pydantic.model_validator(mode="after")
     def check_networks(self) -> Self:
         for host, conf in self.hosts.items():
-            for connection in conf.connections:
-                if connection.network not in self.networks:
-                    raise ValueError(f"{connection.network}: unknown network")
+            for iface in conf.interfaces:
+                if iface.network not in self.networks:
+                    raise ValueError(f"{iface.network}: unknown network")
         return self
 
 
-class Interface(Base):
+class RealizedInterface(Base):
     device: str
     network: str
     prefixlen: int
@@ -64,5 +64,5 @@ class Interface(Base):
 class HostConfiguration(Base):
     name: str
     routes: list[str]
-    interfaces: list[Interface]
+    interfaces: list[RealizedInterface]
     startup: str | None

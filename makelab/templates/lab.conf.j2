@@ -21,8 +21,8 @@ LAB_VERSION="{{ metadata.version }}"
 {% if conf.image %}
 {{host}}[image]={{conf.image}}
 {% endif %}
-{% for net in conf.connections %}
-{{host}}[{{loop.index0}}]={{net.network}}
+{% for iface in conf.interfaces %}
+{{host}}[{{loop.index0}}]={{iface.network}}
 {% endfor %}
 
 {% endfor %}
