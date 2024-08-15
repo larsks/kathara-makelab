@@ -1,17 +1,23 @@
-{% for iface in netconf.interfaces %}
+{% for iface in host.interfaces %}
 # connect device {{ iface.device }} to network "{{ iface.network }}"
 {% for address in iface.addresses %}
 ip addr add {{ address }}/{{ iface.prefixlen }} dev {{ iface.device }}
 {% endfor %}
 {% endfor %}
-{% if netconf.routes %}
+{% if host.routes %}
 
 # routes
-{% for route in netconf.routes %}
+{% for route in host.routes %}
 ip route add {{ route }}
 {% endfor %}
 {% endif %}
-{% if startup %}
+{% if topology.common.startup %}
 
-{{ startup }}
+# common startup commands
+{{ topology.common.startup }}
+{% endif %}
+{% if host.startup %}
+
+# host startup commands
+{{ host.startup }}
 {% endif %}

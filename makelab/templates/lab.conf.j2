@@ -12,10 +12,17 @@ LAB_EMAIL="{{ metadata.email }}"
 {% if metadata.url %}
 LAB_WEB="{{ metadata.url }}"
 {% endif %}
+{% if metadata.version %}
+LAB_VERSION="{{ metadata.version }}"
+{% endif %}
 
 {% endif %}
 {% for host, conf in topology.hosts.items() %}
+{% if conf.image %}
+{{host}}[image]={{conf.image}}
+{% endif %}
 {% for net in conf.connections %}
 {{host}}[{{loop.index0}}]={{net.network}}
 {% endfor %}
+
 {% endfor %}

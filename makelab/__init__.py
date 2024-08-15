@@ -27,11 +27,13 @@ def main():
     env = jinja2.Environment(loader=jinja2.PackageLoader(__package__), trim_blocks=True)
     lab = env.get_template("lab.conf.j2")
     startup = env.get_template("startup.j2")
+    hosts = env.get_template("hosts.j2")
 
     with (args.output_directory / "lab.conf").open("w") as fd:
         fd.write(lab.render(topology=topology))
 
     nextaddr = {}
+    allconf = {}
     for network, conf in topology.networks.items():
         nextaddr[network] = conf.offset
         if conf.gateway is None:
@@ -68,10 +70,18 @@ def main():
                 routes.append(f"default via {gateway}")
 
         routes.extend(conf.routes)
-        netconf = models.NetworkConfiguration(interfaces=interfaces, routes=routes)
+        hostconf = models.HostConfiguration(
+            name=host, interfaces=interfaces, routes=routes, startup=conf.startup
+        )
+        allconf[host] = hostconf
 
         with (args.output_directory / f"{host}.startup").open("w") as fd:
-            fd.write(startup.render(netconf=netconf))
+            fd.write(startup.render(host=hostconf, topology=topology))
+
+    shared_dir = args.output_directory / "shared"
+    shared_dir.mkdir(parents=True, exist_ok=True)
+    with (shared_dir / "hosts").open("w") as fd:
+        fd.write(hosts.render(hosts=allconf))
 
 
 if __name__ == "__main__":

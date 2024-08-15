@@ -11,6 +11,10 @@ networks:
     cidr: 192.168.101.0/24
     offset: 10
 
+common:
+  startup: |
+    cat /shared/hosts >> /etc/hosts
+
 hosts:
   router0:
     autogateway: false

@@ -1,0 +1,7 @@
+{% for host, conf in hosts.items() %}
+{% for iface in conf.interfaces %}
+{% for address in iface.addresses %}
+{{ address }} {{host}}-{{iface.device}}
+{% endfor %}
+{% endfor %}
+{% endfor %}

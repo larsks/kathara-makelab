@@ -17,6 +17,7 @@ class Host(Base):
     connections: list[Connection]
     routes: list[str] = pydantic.Field(default_factory=list)
     startup: str | None = None
+    image: str | None = None
 
 
 class Network(Base):
@@ -31,11 +32,17 @@ class Metadata(Base):
     author: str | None = None
     email: str | None = None
     url: str | None = None
+    version: str | None = None
+
+
+class Common(Base):
+    startup: str | None = None
 
 
 class Topology(Base):
     metadata: Metadata | None = None
     networks: dict[str, Network | None]
+    common: Common | None = None
     hosts: dict[str, Host]
 
     @pydantic.model_validator(mode="after")
@@ -54,6 +61,8 @@ class Interface(Base):
     addresses: list[ipaddress.IPv4Address]
 
 
-class NetworkConfiguration(Base):
+class HostConfiguration(Base):
+    name: str
     routes: list[str]
     interfaces: list[Interface]
+    startup: str | None
