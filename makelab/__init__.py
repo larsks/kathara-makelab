@@ -37,7 +37,7 @@ def main():
         if conf.gateway is None:
             conf.gateway = conf.cidr[1]
 
-    for host, conf in topology.hosts.items():
+    for name, conf in topology.hosts.items():
         interfaces = []
         routes = []
         for n, iface in enumerate(conf.interfaces):
@@ -68,12 +68,15 @@ def main():
                 routes.append(f"default via {gateway}")
 
         routes.extend(conf.routes)
-        hostconf = models.HostConfiguration(
-            name=host, interfaces=interfaces, routes=routes, startup=conf.startup
+        hostconf = models.RealizedHost(
+            name=name,
+            host=conf,
+            interfaces=interfaces,
+            routes=routes,
         )
-        allconf[host] = hostconf
+        allconf[name] = hostconf
 
-        with (args.output_directory / f"{host}.startup").open("w") as fd:
+        with (args.output_directory / f"{name}.startup").open("w") as fd:
             fd.write(startup.render(host=hostconf, topology=topology))
 
     shared_dir = args.output_directory / "shared"

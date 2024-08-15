@@ -17,12 +17,19 @@ LAB_VERSION="{{ metadata.version }}"
 {% endif %}
 
 {% endif %}
-{% for host, conf in topology.hosts.items() %}
-{% if conf.image %}
-{{host}}[image]={{conf.image}}
+{% for name, conf in topology.hosts.items() %}
+{% for opt in conf.options.model_fields_set %}
+{% set val = conf.options[opt] %}
+{% if val is string or val is not iterable %}
+{{name}}[{{opt}}]={{val}}
+{% else %}
+{% for v in val %}
+{{name}}[{{opt}}]={{v}}
+{% endfor %}
 {% endif %}
+{% endfor %}
 {% for iface in conf.interfaces %}
-{{host}}[{{loop.index0}}]={{iface.network}}
+{{name}}[{{loop.index0}}]={{iface.network}}
 {% endfor %}
 
 {% endfor %}

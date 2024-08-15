@@ -6,10 +6,8 @@ metadata:
 networks:
   net0:
     cidr: 192.168.100.0/24
-    offset: 10
   net1:
     cidr: 192.168.101.0/24
-    offset: 10
 
 common:
   startup: |
@@ -20,9 +18,7 @@ hosts:
     autogateway: false
     interfaces:
       - network: net0
-        address: 192.168.100.1
       - network: net1
-        address: 192.168.101.1
   node0:
     interfaces:
     - network: net0

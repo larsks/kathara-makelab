@@ -16,8 +16,8 @@ ip route add {{ route }}
 # common startup commands
 {{ topology.common.startup }}
 {% endif %}
-{% if host.startup %}
+{% if host.host.startup %}
 
 # host startup commands
-{{ host.startup }}
+{{ host.host.startup }}
 {% endif %}

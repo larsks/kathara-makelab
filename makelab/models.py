@@ -12,12 +12,27 @@ class Interface(Base):
     address: str | list[str] | None = None
 
 
+class Options(Base):
+    image: str | None = None
+    mem: str | None = None
+    bridged: bool | None = None
+    cpus: float | None = None
+    ipv6: bool | None = None
+    exec: str | None = None
+    shell: str | None = None
+    num_terms: int | None = None
+
+    sysctl: str | list[str] | None = None
+    env: str | list[str] | None = None
+    port: str | list[str] | None = None
+
+
 class Host(Base):
     autogateway: bool = True
     interfaces: list[Interface]
     routes: list[str] = pydantic.Field(default_factory=list)
     startup: str | None = None
-    image: str | None = None
+    options: Options | None = None
 
 
 class Network(Base):
@@ -61,8 +76,8 @@ class RealizedInterface(Base):
     addresses: list[ipaddress.IPv4Address]
 
 
-class HostConfiguration(Base):
+class RealizedHost(Base):
     name: str
     routes: list[str]
     interfaces: list[RealizedInterface]
-    startup: str | None
+    host: Host

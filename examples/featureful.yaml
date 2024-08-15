@@ -1,0 +1,50 @@
+
+metadata:
+  description: This demonstrates several features of makelab.
+  author: Lars Kellogg-Stedman
+  url: https://github.com/larsks/kathara-makelab
+
+networks:
+  net0:
+    cidr: 192.168.100.0/24
+    gateway: 192.168.100.254
+    offset: 10
+  net1:
+    cidr: 192.168.101.0/24
+    gateway: 192.168.101.254
+    offset: 10
+
+common:
+  startup: |
+    cat /shared/hosts >> /etc/hosts
+
+hosts:
+  router0:
+    autogateway: false
+    interfaces:
+      - network: net0
+        address: 192.168.100.254
+      - network: net1
+        address: 192.168.101.254
+  node0:
+    interfaces:
+    - network: net0
+    startup: |
+      echo nameserver 8.8.8.8 > /etc/resolv.conf
+    options:
+      shell: /bin/sh
+      image: docker.io/alpine:latest
+      bridged: true
+      port:
+        - "8080:8080"
+        - "2222:22"
+  node1:
+    interfaces:
+    - network: net0
+    options:
+      env:
+      - SOMEVAR=foo
+      - ANOTHERVAR=bar
+  node2:
+    interfaces:
+    - network: net1
