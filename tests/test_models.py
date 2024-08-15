@@ -59,23 +59,28 @@ def test_interface():
 
 
 def test_topology_interfaces():
-    topology = models.Topology(
-        networks={
-            "net0": models.Network(cidr="192.168.1.0/28"),
-        },
-        hosts={
-            "host0": models.Host(
-                interfaces=[
-                    models.Interface(network="net0"),
-                ]
-            ),
-            "host1": models.Host(
-                interfaces=[
-                    models.Interface(network="net0", address="192.168.1.10"),
-                ]
-            ),
-        },
+    topology = models.Topology.model_validate(
+        {
+            "networks": {
+                "net0": {
+                    "cidr": "192.168.1.0/28",
+                }
+            },
+            "hosts": {
+                "host0": {
+                    "interfaces": [
+                        {"network": "net0"},
+                    ]
+                },
+                "host1": {
+                    "interfaces": [
+                        {"network": "net0", "address": "192.168.1.10"},
+                    ]
+                },
+            },
+        }
     )
+
     assert topology.hosts["host0"].interfaces[0].address[0] == ipaddress.IPv4Address(
         "192.168.1.2"
     )
