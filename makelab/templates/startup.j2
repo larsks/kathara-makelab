@@ -1,3 +1,13 @@
+{% if topology.common.startup_early %}
+# common early startup commands
+{{ topology.common.startup_early }}
+
+{% endif %}
+{% if host.host.startup_early %}
+# host early startup commands
+{{ host.host.startup_early }}
+
+{% endif %}
 {% for iface in host.interfaces %}
 # connect device {{ iface.device }} to network "{{ iface.network }}"
 {% for address in iface.addresses %}

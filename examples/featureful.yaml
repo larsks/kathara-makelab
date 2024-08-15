@@ -15,7 +15,7 @@ networks:
     offset: 10
 
 common:
-  startup: |
+  startup: |-
     cat /shared/hosts >> /etc/hosts
 
 hosts:
@@ -29,8 +29,10 @@ hosts:
   node0:
     interfaces:
     - network: net0
-    startup: |
+    startup: |-
       echo nameserver 8.8.8.8 > /etc/resolv.conf
+    startup_early: |-
+      ip route delete default
     options:
       shell: /bin/sh
       image: docker.io/alpine:latest
@@ -48,3 +50,4 @@ hosts:
   node2:
     interfaces:
     - network: net1
+      address: 192.168.101.37

@@ -32,6 +32,7 @@ class Host(Base):
     interfaces: list[Interface]
     routes: list[str] = pydantic.Field(default_factory=list)
     startup: str | None = None
+    startup_early: str | None = None
     options: Options | None = None
 
 
@@ -52,6 +53,7 @@ class Metadata(Base):
 
 class Common(Base):
     startup: str | None = None
+    startup_early: str | None = None
 
 
 class Topology(Base):
