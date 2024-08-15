@@ -4,8 +4,12 @@ verify_ssl = false
 name = "pip_conf_index_install"
 
 [packages]
+pydantic = "*"
+pyyaml = "*"
+jinja2 = "*"
 
 [dev-packages]
+pytest = "*"
 
 [requires]
 python_version = "3.12"
