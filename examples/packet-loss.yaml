@@ -1,0 +1,35 @@
+# NB: This lab requires that your host kernel supports the "netem" qdisc.
+
+metadata:
+  description: Lab for showing how to use the tc tool to add a fixed delay on a device interface
+  url: https://github.com/KatharaFramework/Kathara-Labs/tree/main/tutorials/traffic-control/packet-loss
+
+networks:
+  A:
+    cidr: 100.0.0.0/24
+  B:
+    cidr: 200.0.0.0/24
+
+common:
+  startup: |
+    cat /shared/hosts >> /etc/hosts
+
+hosts:
+  r1:
+    image: kathara/base
+    autogateway: false
+    interfaces:
+      - network: A
+      - network: B
+    startup: |
+      tc qdisc add dev eth0 root netem delay 10ms loss 10%
+
+  pc1:
+    image: kathara/base
+    interfaces:
+      - network: A
+
+  pc2:
+    image: kathara/base
+    interfaces:
+      - network: B

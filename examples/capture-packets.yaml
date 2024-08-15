@@ -1,0 +1,25 @@
+metadata:
+  url: https://github.com/KatharaFramework/Kathara-Labs/tree/main/tutorials/capture-packets
+
+networks:
+  A:
+    cidr: 100.0.0.0/24
+
+common:
+  startup: |
+    cat /shared/hosts >> /etc/hosts
+
+hosts:
+  pc1:
+    interfaces:
+      - network: A
+  pc2:
+    interfaces:
+      - network: A
+  wireshark:
+    interfaces:
+      - network: A
+    options:
+      bridged: true
+      image: lscr.io/linuxserver/wireshark
+      port: 3000:3000/tcp
