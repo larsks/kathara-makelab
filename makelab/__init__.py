@@ -14,22 +14,7 @@ def parse_args():
     return p.parse_args()
 
 
-def main():
-    args = parse_args()
-
-    with open(args.topology) as fd:
-        raw = yaml.safe_load(fd)
-
-    topology = models.Topology.model_validate(raw)
-
-    env = jinja2.Environment(loader=jinja2.PackageLoader(__package__), trim_blocks=True)
-    lab = env.get_template("lab.conf.j2")
-    startup = env.get_template("startup.j2")
-    hosts = env.get_template("hosts.j2")
-
-    with (args.output_directory / "lab.conf").open("w") as fd:
-        fd.write(lab.render(topology=topology))
-
+def generate_host_configs(topology: models.Topology) -> dict[str, models.RealizedHost]:
     allconf = {}
     for network, conf in topology.networks.items():
         if conf.gateway is None:
@@ -44,12 +29,9 @@ def main():
 
             if iface.address is None:
                 addrs = [next(network)]
-            elif isinstance(iface.address, list):
-                addrs = network.allocate_all(iface.address)
             else:
-                addrs = [network.allocate(iface.address)]
+                addrs = network.allocate(*iface.address)
 
-            addrs = [ipaddress.IPv4Address(addr) for addr in addrs]
             interfaces.append(
                 models.RealizedInterface(
                     device=dev,
@@ -72,6 +54,28 @@ def main():
         )
         allconf[name] = hostconf
 
+    return allconf
+
+
+def main():
+    args = parse_args()
+
+    with open(args.topology) as fd:
+        raw = yaml.safe_load(fd)
+
+    topology = models.Topology.model_validate(raw)
+
+    env = jinja2.Environment(loader=jinja2.PackageLoader(__package__), trim_blocks=True)
+    lab = env.get_template("lab.conf.j2")
+    startup = env.get_template("startup.j2")
+    hosts = env.get_template("hosts.j2")
+
+    with (args.output_directory / "lab.conf").open("w") as fd:
+        fd.write(lab.render(topology=topology))
+
+    allconf = generate_host_configs(topology)
+
+    for name, hostconf in allconf.items():
         with (args.output_directory / f"{name}.startup").open("w") as fd:
             fd.write(startup.render(host=hostconf, topology=topology))
 
