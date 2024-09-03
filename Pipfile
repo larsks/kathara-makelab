@@ -7,6 +7,8 @@ name = "pip_conf_index_install"
 pydantic = "*"
 pyyaml = "*"
 jinja2 = "*"
+networkx = "*"
+pydot = "*"
 
 [dev-packages]
 pytest = "*"

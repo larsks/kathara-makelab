@@ -8,7 +8,9 @@ version = "1.0.0"
 dependencies = [
   "pydantic",
   "pyyaml",
-  "jinja2"
+  "jinja2",
+  "networkx",
+  "pydot",
 ]
 
 [project.scripts]

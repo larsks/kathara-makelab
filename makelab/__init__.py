@@ -1,6 +1,7 @@
 import argparse
 import ipaddress
 import jinja2
+import networkx as nx
 import pathlib
 import yaml
 
@@ -57,6 +58,20 @@ def generate_host_configs(topology: models.Topology) -> dict[str, models.Realize
     return allconf
 
 
+def generate_diagram(topology, path):
+    G = nx.Graph()
+
+    for name in topology.networks:
+        G.add_node(name)
+
+    for name, conf in topology.hosts.items():
+        G.add_node(name, shape="box")
+        for iface in conf.interfaces:
+            G.add_edge(name, iface.network)
+
+    nx.drawing.nx_pydot.write_dot(G, path)
+
+
 def main():
     args = parse_args()
 
@@ -83,6 +98,8 @@ def main():
     shared_dir.mkdir(parents=True, exist_ok=True)
     with (shared_dir / "hosts").open("w") as fd:
         fd.write(hosts.render(hosts=allconf))
+
+    generate_diagram(topology, args.output_directory / "topology.dot")
 
 
 if __name__ == "__main__":
