@@ -9,10 +9,12 @@
 
 {% endif %}
 {% for iface in host.interfaces %}
+{% if iface.addresses %}
 # connect device {{ iface.device }} to network "{{ iface.network }}"
 {% for address in iface.addresses %}
 ip addr add {{ address }}/{{ iface.prefixlen }} dev {{ iface.device }}
 {% endfor %}
+{% endif %}
 {% endfor %}
 {% if host.routes %}
 

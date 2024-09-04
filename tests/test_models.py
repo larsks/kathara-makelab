@@ -81,9 +81,11 @@ def test_topology_interfaces():
         }
     )
 
-    assert topology.hosts["host0"].interfaces[0].address[0] == ipaddress.IPv4Address(
-        "192.168.1.2"
-    )
+    assert topology.hosts["host0"].interfaces[0].address is None
+
+    # This is just to avoid a typing error on the following line
+    assert topology.hosts["host1"].interfaces[0].address is not None
+
     assert topology.hosts["host1"].interfaces[0].address[0] == ipaddress.IPv4Address(
         "192.168.1.10"
     )

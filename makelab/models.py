@@ -9,6 +9,7 @@ class Base(pydantic.BaseModel):
 
 class Interface(Base):
     network: str
+    autoip: bool | None = None
     address: list[ipaddress.IPv4Address] | None = None
 
     @pydantic.field_validator("address", mode="before")
@@ -20,7 +21,7 @@ class Interface(Base):
         return v
 
 
-class Options(Base):
+class HostOptions(Base):
     image: str | None = None
     mem: str | None = None
     bridged: bool | None = None
@@ -37,11 +38,12 @@ class Options(Base):
 
 class Host(Base):
     autogateway: bool = True
+    autoip: bool = True
     interfaces: list[Interface]
     routes: list[str] = pydantic.Field(default_factory=list)
     startup: str | None = None
     startup_early: str | None = None
-    options: Options | None = None
+    options: HostOptions | None = None
 
 
 class Network(Base):
@@ -85,16 +87,14 @@ class Network(Base):
         self._allocated.add(addr)
         return addr
 
-    def allocate(
-        self, *addrs: list[ipaddress.IPv4Address]
-    ) -> list[ipaddress.IPv4Address]:
+    def allocate(self, *addrs: ipaddress.IPv4Address) -> list[ipaddress.IPv4Address]:
         """Mark one or more addresses as in use. Once an address has been
         allocated, a subsequent attempt to allocate it will result in a
         ValueError."""
 
         return [self._allocate_one(addr) for addr in addrs]
 
-    def seen(addr: ipaddress.IPv4Address) -> bool:
+    def seen(self, addr: ipaddress.IPv4Address) -> bool:
         return addr in self._allocated
 
 
@@ -104,7 +104,6 @@ class Metadata(Base):
     author: str | None = None
     email: str | None = None
     url: str | None = None
-    version: str | None = None
 
 
 class Common(Base):
@@ -120,16 +119,14 @@ class Topology(Base):
 
     @pydantic.model_validator(mode="after")
     def validate_interfaces(self) -> Self:
-        for host, conf in self.hosts.items():
+        for _, conf in self.hosts.items():
             for iface in conf.interfaces:
                 if iface.network not in self.networks:
                     raise ValueError(f"{iface.network}: unknown network")
 
                 network = self.networks[iface.network]
 
-                if iface.address is None:
-                    iface.address = [next(network)]
-                else:
+                if iface.address is not None:
                     for address in iface.address:
                         if address not in network.cidr:
                             raise ValueError(

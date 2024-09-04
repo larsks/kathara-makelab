@@ -15,6 +15,16 @@ def parse_args():
     return p.parse_args()
 
 
+def option_is_enabled(*opts: bool | None) -> bool:
+    for opt in opts:
+        if opt is None:
+            continue
+
+        return opt
+
+    return False
+
+
 def generate_host_configs(topology: models.Topology) -> dict[str, models.RealizedHost]:
     allconf = {}
     for network, conf in topology.networks.items():
@@ -27,10 +37,11 @@ def generate_host_configs(topology: models.Topology) -> dict[str, models.Realize
         for n, iface in enumerate(conf.interfaces):
             network = topology.networks[iface.network]
             dev = f"eth{n}"
+            addrs: list[ipaddress.IPv4Address] = []
 
-            if iface.address is None:
+            if iface.address is None and option_is_enabled(iface.autoip, conf.autoip):
                 addrs = [next(network)]
-            else:
+            elif iface.address is not None:
                 addrs = network.allocate(*iface.address)
 
             interfaces.append(
